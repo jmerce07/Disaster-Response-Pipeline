@@ -46,8 +46,8 @@ The final result is a web app that allows a user to input a new message and get 
 
 In order to create the data base, create the model, and get the web app to work, complete the following steps in order:
 
-1. Run data/process_data.py (clean the data and create database)
-2. Run models/train_classifier.py (train the data and save the model)
+1. Run python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db (clean the data and create database)
+2. Run python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl (train the data and save the model)
 3. Run app.py while in the app's directory (runs the web app)
 
 ## Licensing, Authors, Acknowledgements
