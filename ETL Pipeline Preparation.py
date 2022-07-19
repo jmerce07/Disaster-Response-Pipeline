@@ -8,7 +8,7 @@
 # - Load `messages.csv` into a dataframe and inspect the first few lines.
 # - Load `categories.csv` into a dataframe and inspect the first few lines.
 
-# In[1]:
+# In[33]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 
-# In[2]:
+# In[34]:
 
 
 # load messages dataset
@@ -25,7 +25,7 @@ messages = pd.read_csv("messages.csv")
 messages.head()
 
 
-# In[3]:
+# In[35]:
 
 
 # load categories dataset
@@ -37,7 +37,7 @@ categories.head()
 # - Merge the messages and categories datasets using the common id
 # - Assign this combined dataset to `df`, which will be cleaned in the following steps
 
-# In[4]:
+# In[36]:
 
 
 # merge datasets
@@ -50,7 +50,7 @@ df.head()
 # - Use the first row of categories dataframe to create column names for the categories data.
 # - Rename columns of `categories` with new column names.
 
-# In[5]:
+# In[37]:
 
 
 # create a dataframe of the 36 individual category columns
@@ -58,7 +58,7 @@ categories = df['categories'].str.split(";", expand=True)
 categories.head()
 
 
-# In[6]:
+# In[38]:
 
 
 # select the first row of the categories dataframe
@@ -71,7 +71,7 @@ category_colnames = row.apply(lambda x: x[:-2])
 print(category_colnames)
 
 
-# In[7]:
+# In[39]:
 
 
 # rename the columns of `categories`
@@ -83,23 +83,31 @@ categories.head()
 # - Iterate through the category columns in df to keep only the last character of each string (the 1 or 0). For example, `related-0` becomes `0`, `related-1` becomes `1`. Convert the string to a numeric value.
 # - You can perform [normal string actions on Pandas Series](https://pandas.pydata.org/pandas-docs/stable/text.html#indexing-with-str), like indexing, by including `.str` after the Series. You may need to first convert the Series to be of type string, which you can do with `astype(str)`.
 
-# In[8]:
+# In[40]:
 
 
 for column in categories:
     # set each value to be the last character of the string
     categories[column] = categories[column].str[-1:]
+    categories.replace('2', '1')
     
     # convert column from string to numeric
     categories[column] = categories[column].astype(int)
+categories['related'] = categories['related'].replace(2, 1)
 categories.head()
+
+
+# In[41]:
+
+
+categories.related.value_counts()
 
 
 # ### 5. Replace `categories` column in `df` with new category columns.
 # - Drop the categories column from the df dataframe since it is no longer needed.
 # - Concatenate df and categories data frames.
 
-# In[9]:
+# In[42]:
 
 
 # drop the original categories column from `df`
@@ -108,7 +116,7 @@ df.drop(columns=['categories'],inplace=True)
 df.head()
 
 
-# In[10]:
+# In[43]:
 
 
 # concatenate the original dataframe with the new `categories` dataframe
@@ -121,7 +129,7 @@ df.head()
 # - Drop the duplicates.
 # - Confirm duplicates were removed.
 
-# In[11]:
+# In[44]:
 
 
 #checking unique values in categories df
@@ -129,14 +137,14 @@ print(df.shape)
 df.nunique ()
 
 
-# In[12]:
+# In[45]:
 
 
 # Count duplicate on a column
 df.message.duplicated().sum()
 
 
-# In[13]:
+# In[46]:
 
 
 # drop duplicates
@@ -144,14 +152,14 @@ df = df.drop_duplicates(subset = ['message'])
 df.shape
 
 
-# In[14]:
+# In[47]:
 
 
 # check the number unique messages is the same as the number of records
 df.message.nunique () == len(df)
 
 
-# In[15]:
+# In[48]:
 
 
 # Count duplicate on a column
@@ -161,18 +169,11 @@ df.message.duplicated().sum()
 # ### 7. Save the clean dataset into an sqlite database.
 # You can do this with pandas [`to_sql` method](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html) combined with the SQLAlchemy library. Remember to import SQLAlchemy's `create_engine` in the first cell of this notebook to use it below.
 
-# In[18]:
+# In[51]:
 
 
 engine = create_engine('sqlite:///DisasterResponse.db')
-df.to_sql('DisasterResponse', engine, index=False)
-
-
-# In[17]:
-
-
-engine = create_engine('sqlite:///ETL_Preparation.db')
-df.to_sql('ETL_Preparation', engine, index=False)
+df.to_sql('DisasterResponse', engine, index=False, if_exists='replace')
 
 
 # ### 8. Use this notebook to complete `etl_pipeline.py`
